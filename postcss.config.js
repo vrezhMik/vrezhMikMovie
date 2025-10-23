@@ -1,7 +1,5 @@
-// use CommonJS to avoid ESM resolution quirks
-module.exports = {
+export default {
   plugins: {
     "@tailwindcss/postcss": {},
-    autoprefixer: {},
   },
 };

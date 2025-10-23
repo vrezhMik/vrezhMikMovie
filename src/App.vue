@@ -1,9 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import AppLayout from "./app/layout/AppLayout.vue";
+</script>
 
 <template>
-  <div class="p-6 rounded-2xl bg-primary text-green text-[30px]">
-    Tailwind is working 🎉
-  </div>
+  <AppLayout />
 </template>
-
-<style scoped></style>
