@@ -151,9 +151,6 @@ html.light {
   color: transparent;
 }
 
-/* =========================
-   Base styles
-   ========================= */
 @layer base {
   *,
   ::before,
@@ -179,5 +176,8 @@ html.light {
     font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI",
       sans-serif;
     @apply font-semibold tracking-tight;
+  }
+  button {
+    cursor: pointer;
   }
 }

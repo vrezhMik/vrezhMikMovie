@@ -53,10 +53,8 @@ function isThemeDark() {
             vrezhMikMovies
           </h1>
         </RouterLink>
-        <div>
-          <SearchBar />
-        </div>
-        <div>
+        <SearchBar />
+        <div class="flex items-center gap-2">
           <HeaderButton
             :icon="LikeIcon"
             :method="
