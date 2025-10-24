@@ -2,6 +2,36 @@
 import { RouterLink } from "vue-router";
 import MovieIcon from "../../components/icons/MovieIcon.vue";
 import SearchBar from "../../features/search-bar/SearchBar.vue";
+import HeaderButton from "../../components/UI/HeaderButton.vue";
+import LikeIcon from "../../components/icons/LikeIcon.vue";
+import LightIcon from "../../components/icons/LightIcon.vue";
+import DarkIcon from "../../components/icons/DarkIcon.vue";
+import { ref, onMounted, watchEffect } from "vue";
+
+type Theme = "light" | "dark";
+const theme = ref<Theme>("dark");
+
+onMounted(() => {
+  const saved = localStorage.getItem("theme") as Theme | null;
+  if (saved) {
+    theme.value = saved;
+  }
+});
+
+watchEffect(() => {
+  const html = document.documentElement;
+  html.classList.remove("light", "dark");
+  html.classList.add(theme.value);
+  localStorage.setItem("theme", theme.value);
+});
+
+function toggleTheme() {
+  theme.value = theme.value === "dark" ? "light" : "dark";
+}
+
+function isThemeDark() {
+  return theme.value === "dark";
+}
 </script>
 
 <template>
@@ -23,11 +53,27 @@ import SearchBar from "../../features/search-bar/SearchBar.vue";
             vrezhMikMovies
           </h1>
         </RouterLink>
-
         <div>
           <SearchBar />
         </div>
-        <div />
+        <div>
+          <HeaderButton
+            :icon="LikeIcon"
+            :method="
+              () => {
+                console.log('Like');
+              }
+            "
+          />
+          <HeaderButton
+            :icon="isThemeDark() ? LightIcon : DarkIcon"
+            :method="
+              () => {
+                toggleTheme();
+              }
+            "
+          />
+        </div>
       </div>
     </div>
   </header>
