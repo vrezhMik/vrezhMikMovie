@@ -165,4 +165,19 @@ html.light {
   button {
     cursor: pointer;
   }
+  .custom-scrollbar::-webkit-scrollbar {
+    @apply h-2 w-2;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-muted rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
 }

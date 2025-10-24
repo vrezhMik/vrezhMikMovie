@@ -42,7 +42,7 @@ function isThemeDark() {
   <header
     class="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl"
   >
-    <div class="mx-auto max-w-7xl px-4">
+    <div class="container mx-auto px-4">
       <div class="flex h-16 items-center justify-between gap-4">
         <RouterLink to="/" class="flex items-center gap-3 group">
           <div
