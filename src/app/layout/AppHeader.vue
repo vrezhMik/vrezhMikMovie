@@ -6,29 +6,33 @@ import HeaderButton from "../../components/UI/HeaderButton.vue";
 import LikeIcon from "../../components/icons/LikeIcon.vue";
 import LightIcon from "../../components/icons/LightIcon.vue";
 import DarkIcon from "../../components/icons/DarkIcon.vue";
-import { ref, onMounted, watchEffect } from "vue";
+import { ref, watch } from "vue";
 
 type Theme = "light" | "dark";
-const theme = ref<Theme>("dark");
 
-onMounted(() => {
-  const saved = localStorage.getItem("theme") as Theme | null;
-  if (saved) {
-    theme.value = saved;
-  }
-});
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "dark";
+  const saved = localStorage.getItem("theme");
+  if (saved === "light" || saved === "dark") return saved;
+  return "dark";
+}
 
-watchEffect(() => {
+const theme = ref<Theme>(getInitialTheme());
+
+function applyTheme(val: Theme) {
   const html = document.documentElement;
   html.classList.remove("light", "dark");
-  html.classList.add(theme.value);
-  localStorage.setItem("theme", theme.value);
-});
+  html.classList.add(val);
+  localStorage.setItem("theme", val);
+}
+
+applyTheme(theme.value);
+
+watch(theme, (val) => applyTheme(val));
 
 function toggleTheme() {
   theme.value = theme.value === "dark" ? "light" : "dark";
 }
-
 function isThemeDark() {
   return theme.value === "dark";
 }
@@ -46,30 +50,20 @@ function isThemeDark() {
           >
             <MovieIcon class="w-5 h-5 text-white" />
           </div>
-
           <h1
             class="hidden sm:inline-block text-xl font-bold text-gradient-primary"
           >
             vrezhMikMovies
           </h1>
         </RouterLink>
+
         <SearchBar />
+
         <div class="flex items-center gap-2">
-          <HeaderButton
-            :icon="LikeIcon"
-            :method="
-              () => {
-                console.log('Like');
-              }
-            "
-          />
+          <HeaderButton :icon="LikeIcon" :method="() => console.log('Like')" />
           <HeaderButton
             :icon="isThemeDark() ? LightIcon : DarkIcon"
-            :method="
-              () => {
-                toggleTheme();
-              }
-            "
+            :method="toggleTheme"
           />
         </div>
       </div>
