@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue";
 import ObjectPoolCarousel from "../carousel/ObjectPoolCarousel.vue";
 import { trendingMovies, type TmdbMovie } from "../../shared/api/tmdb";
-
+import DateIcon from "../../components/icons/DateIcon.vue";
 const trending = ref<TmdbMovie[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -21,6 +21,15 @@ async function load() {
 }
 
 onMounted(load);
+function formatToMonthYear(dateStr: string | undefined): string {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
 </script>
 
 <template>
@@ -65,6 +74,16 @@ onMounted(load);
               >
                 {{ item.title || item.name }}
               </h3>
+              <div style="display: contents">
+                <div
+                  class="inline-flex items-center rounded-full px-3 py-1 font-medium transition-all duration-300 bg-card/40 backdrop-blur-sm text-foreground border border-white/10 text-xs"
+                >
+                  <div style="display: contents">
+                    <DateIcon />
+                  </div>
+                  {{ formatToMonthYear(item.release_date) }}
+                </div>
+              </div>
             </div>
           </div>
         </RouterLink>
