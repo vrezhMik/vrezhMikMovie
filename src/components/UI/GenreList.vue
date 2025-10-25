@@ -37,7 +37,7 @@ function isChecked(id: number) {
       <label
         v-for="g in genres"
         :key="g.id"
-        class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-300 bg-card/40 border border-transparent hover:bg-card-hover"
+        class="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-300 bg-card border border-transparent hover:bg-card-hover"
       >
         <input
           class="h-4 w-4 rounded border-primary text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"

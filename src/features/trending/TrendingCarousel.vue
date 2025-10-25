@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import ObjectPoolCarousel from "../carousel/ObjectPoolCarousel.vue";
 import { trendingMovies, type TmdbMovie } from "../../shared/api/tmdb";
 import DateIcon from "../../components/icons/DateIcon.vue";
+
 const trending = ref<TmdbMovie[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -20,8 +21,15 @@ async function load() {
   }
 }
 
-onMounted(load);
-function formatToMonthYear(dateStr: string | undefined): string {
+function getRatingClass(v?: number) {
+  const score = v ?? 0;
+  if (score <= 3) return "from-danger to-danger/70";
+  if (score <= 5) return "from-warning to-warning/70";
+  if (score <= 7) return "from-ring to-ring/70";
+  return "from-success to-success/70";
+}
+
+function formatToMonthYear(dateStr?: string): string {
   if (!dateStr) return "";
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return "";
@@ -30,6 +38,8 @@ function formatToMonthYear(dateStr: string | undefined): string {
     year: "numeric",
   }).format(date);
 }
+
+onMounted(load);
 </script>
 
 <template>
@@ -58,31 +68,33 @@ function formatToMonthYear(dateStr: string | undefined): string {
               class="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-110"
               loading="lazy"
             />
+
             <div
               class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
             />
+
             <div class="absolute top-3 left-3">
               <div
-                class="inline-flex items-center justify-center w-12 h-12 rounded-full font-bold text-sm bg-gradient-to-br from-success to-success/70 shadow-xl"
+                :class="[
+                  'inline-flex items-center justify-center w-12 h-12 rounded-full font-bold text-sm bg-gradient-to-br shadow-xl on-media text-foreground',
+                  getRatingClass(item.vote_average),
+                ]"
               >
                 {{ (item.vote_average ?? 0).toFixed(1) }}
               </div>
             </div>
-            <div class="absolute bottom-0 left-0 right-0 p-4">
+
+            <div class="absolute bottom-0 left-0 right-0 p-4 on-media">
               <h3
                 class="text-foreground font-display font-semibold text-lg mb-2 line-clamp-2"
               >
                 {{ item.title || item.name }}
               </h3>
-              <div style="display: contents">
-                <div
-                  class="inline-flex items-center rounded-full px-3 py-1 font-medium transition-all duration-300 bg-card/40 backdrop-blur-sm text-foreground border border-white/10 text-xs"
-                >
-                  <div style="display: contents">
-                    <DateIcon />
-                  </div>
-                  {{ formatToMonthYear(item.release_date) }}
-                </div>
+              <div
+                class="inline-flex items-center rounded-full px-3 py-1 font-medium transition-all duration-300 bg-card/40 backdrop-blur-sm text-foreground border border-white/10 text-xs"
+              >
+                <DateIcon class="mr-1 h-3 w-3" />
+                {{ formatToMonthYear(item.release_date) }}
               </div>
             </div>
           </div>

@@ -114,6 +114,11 @@ html.light {
   backdrop-filter: blur(40px);
   border: 1px solid hsl(0 0% 100% / 0.1);
 }
+@utility on-media {
+  --color-foreground: hsl(0 0% 100%);
+  --color-muted-foreground: hsl(0 0% 100% / 0.8);
+  --color-border: hsl(0 0% 100% / 0.2);
+}
 @utility text-gradient-primary {
   background: linear-gradient(
     to right,
