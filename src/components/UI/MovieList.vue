@@ -102,7 +102,7 @@ onBeforeUnmount(() => {
         title="More Movies"
         description="Discover more great films"
         :icon="MovieIcon"
-        icon_gradient="bg-gradient-to-br from-primary to-accent"
+        icon_style="bg-gradient-to-br from-primary to-accent"
       />
     </div>
 
