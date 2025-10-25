@@ -45,3 +45,19 @@ export function discoverMovies(opts?: {
         region,
     });
 }
+
+export function trendingMovies(opts?: {
+    time_window?: "day" | "week";
+    page?: number;
+    language?: string;
+    region?: string;
+}) {
+    const time_window = opts?.time_window ?? "day";
+    const page = opts?.page ?? 1;
+    const language = opts?.language ?? "en-US";
+    const region = opts?.region;
+
+    return tmdbGet<TmdbPaginated<TmdbMovie>>(`/trending/movie/${time_window}`, {
+        page, language, region,
+    }, 10 * 60 * 1000);
+}
