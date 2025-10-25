@@ -2,15 +2,11 @@
 import DateIcon from "../icons/DateIcon.vue";
 import LikeIcon from "../icons/LikeIcon.vue";
 import type { TmdbMovie } from "../../shared/api/tmdb";
-
+import { ref, onMounted } from "vue";
 const props = defineProps<{
   movie: TmdbMovie;
 }>();
-
-function formatToOneDecimal(num: number): number {
-  if (isNaN(num)) return 0;
-  return Math.floor(num * 10) / 10;
-}
+const ratingCalss = ref<string>("");
 
 function formatToMonthYear(dateStr: string | undefined): string {
   if (!dateStr) return "";
@@ -21,6 +17,17 @@ function formatToMonthYear(dateStr: string | undefined): string {
     year: "numeric",
   }).format(date);
 }
+onMounted(() => {
+  if (props.movie.vote_average <= 3) {
+    ratingCalss.value = "from-danger to-danger/70";
+  } else if (props.movie.vote_average <= 5) {
+    ratingCalss.value = "from-warning to-warning/70";
+  } else if (props.movie.vote_average <= 7) {
+    ratingCalss.value = "from-ring to-ring/70";
+  } else {
+    ratingCalss.value = "from-success to-success/70";
+  }
+});
 </script>
 
 <template>
@@ -58,9 +65,12 @@ function formatToMonthYear(dateStr: string | undefined): string {
           <div class="absolute top-3 left-3">
             <div style="display: contents">
               <div
-                class="inline-flex items-center justify-center w-12 h-12 rounded-full font-bold text-sm bg-gradient-to-br from-success to-success/70 shadow-xl"
+                :class="[
+                  'inline-flex items-center justify-center w-12 h-12 rounded-full font-bold text-sm bg-gradient-to-br shadow-xl',
+                  ratingCalss,
+                ]"
               >
-                {{ formatToOneDecimal(props.movie.vote_average) }}
+                {{ (props.movie.vote_average ?? 0).toFixed(1) }}
               </div>
             </div>
           </div>
