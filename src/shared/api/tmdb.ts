@@ -61,3 +61,15 @@ export function trendingMovies(opts?: {
         page, language, region,
     }, 10 * 60 * 1000);
 }
+export interface TmdbGenre {
+    id: number;
+    name: string;
+}
+
+export function getMovieGenres(language = "en-US") {
+    return tmdbGet<{ genres: TmdbGenre[] }>(
+        "/genre/movie/list",
+        { language },
+        24 * 60 * 60 * 1000
+    );
+}
