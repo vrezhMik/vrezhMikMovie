@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import ObjectPoolCarousel from "../carousel/ObjectPoolCarousel.vue";
+import MovieIcon from "../../components/icons/MovieIcon.vue";
+import SectionTitle from "../../components/UI/SectionTitle.vue";
 const trending = [
   {
     id: 1,
@@ -46,8 +48,8 @@ const trending = [
 ];
 import { ref, onMounted } from "vue";
 import { discoverMovies, type TmdbMovie } from "../../shared/api/tmdb";
-import LikeIcon from "../../components/icons/LikeIcon.vue";
-import DateIcon from "../../components/icons/DateIcon.vue";
+import MovieCard from "../../components/UI/MovieCard.vue";
+
 const loading = ref(false);
 const page = ref(1);
 const movies = ref<TmdbMovie[]>([]);
@@ -136,115 +138,18 @@ onMounted(load);
 
     <section style="opacity: 1; transform: none">
       <div class="mb-6">
-        <div class="flex items-center gap-3 mb-2">
-          <div class="p-2 rounded-lg bg-card border border-border">
-            <div style="display: contents">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-film h-5 w-5 text-foreground"
-                aria-hidden="true"
-              >
-                <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                <path d="M7 3v18"></path>
-                <path d="M3 7.5h4"></path>
-                <path d="M3 12h18"></path>
-                <path d="M3 16.5h4"></path>
-                <path d="M17 3v18"></path>
-                <path d="M17 7.5h4"></path>
-                <path d="M17 16.5h4"></path>
-              </svg>
-            </div>
-          </div>
-          <div>
-            <h2 class="text-3xl font-display font-bold text-foreground">
-              More Movies
-            </h2>
-            <p class="text-muted-foreground">Discover more great films</p>
-          </div>
-        </div>
+        <SectionTitle
+          title="More Movies"
+          description="Discover more great films"
+          :icon="MovieIcon"
+        />
       </div>
       <div style="display: contents">
         <div data-testid="movie-grid">
           <div
             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6"
           >
-            <div style="display: contents" v-for="value in movies">
-              <div
-                data-testid="movie-card"
-                class="group relative rounded-2xl overflow-hidden bg-card shadow-lg transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 transform-gpu"
-                style="opacity: 1; transform: none"
-              >
-                <a class="block" href="/movie/1" data-discover="true">
-                  <div class="relative aspect-[2/3] overflow-hidden bg-muted">
-                    <img
-                      :alt="value.title"
-                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                      :src="`https://image.tmdb.org/t/p/w342${value.poster_path}`"
-                    />
-                    <div
-                      class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    ></div>
-                    <div
-                      class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    >
-                      <div style="display: contents">
-                        <button
-                          data-testid="favorite-button"
-                          aria-pressed="false"
-                          aria-label="Add to favorites"
-                          class="inline-flex items-center justify-center rounded-full transition-all duration-300 transform-gpu bg-card/60 backdrop-blur-sm text-muted-foreground border border-white/10 hover:bg-card-hover hover:text-foreground h-8 w-8"
-                          tabindex="0"
-                        >
-                          <div style="transform: none">
-                            <div style="display: contents">
-                              <LikeIcon />
-                            </div>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                    <div class="absolute top-3 left-3">
-                      <div style="display: contents">
-                        <div
-                          data-testid="rating-badge"
-                          class="inline-flex items-center justify-center w-12 h-12 rounded-full font-bold text-sm bg-gradient-to-br from-success to-success/70 shadow-xl"
-                        >
-                          {{ value.vote_average }}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      class="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"
-                    >
-                      <h3
-                        class="text-foreground font-display font-semibold text-lg mb-2 line-clamp-2"
-                      >
-                        {{ value.title }}
-                      </h3>
-                      <div style="display: contents">
-                        <div
-                          class="inline-flex items-center rounded-full px-3 py-1 font-medium transition-all duration-300 bg-card/40 backdrop-blur-sm text-foreground border border-white/10 text-xs"
-                        >
-                          <div style="display: contents">
-                            <DateIcon />
-                          </div>
-                          {{ value.release_date }}
-                        </div>
-                      </div>
-                    </div>
-                  </div></a
-                >
-              </div>
-            </div>
+            <MovieCard v-for="movie in movies" :movie="movie" />
           </div>
           <div class="h-20 flex items-center justify-center mt-8">
             <p class="text-muted-foreground text-sm">Loading more...</p>
