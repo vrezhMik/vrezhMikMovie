@@ -27,22 +27,18 @@ const animating = ref(false);
 const head = ref(0);
 
 const step = computed(() => (props.itemWidthPx ?? 0) + (props.gapPx ?? 0));
-/** Resting offset keeps the "viewport" centered between a 1-item buffer on both sides */
 const baseOffset = computed(() => -step.value);
 
-/** Pool = visible + 2 (1 buffer on each side) */
 const poolSize = computed(() =>
   Math.min(props.items.length, (props.visible ?? 0) + 2)
 );
 
-/** Which real item index should each pooled slot show */
 const visibleIndices = computed<number[]>(() => {
   const len = props.items.length;
   if (len === 0) return [];
   const count = poolSize.value;
   const out: number[] = new Array(count);
   for (let i = 0; i < count; i++) {
-    // start from head-1 to include the left buffer
     out[i] = (head.value + i - 1 + len) % len;
   }
   return out;
@@ -61,7 +57,6 @@ onMounted(() => {
 });
 
 watch(step, () => {
-  // If step changes (responsive), re-center the strip
   resetTransform();
 });
 
@@ -79,12 +74,11 @@ function shift(by: 1 | -1) {
 
   animating.value = true;
 
-  // Animate away from the resting "-step" position
   transition.value = "transform 350ms var(--transition-smooth)";
   transform.value =
     by === 1
-      ? `translateX(${baseOffset.value - step.value}px)` // -step -> -2*step
-      : `translateX(${baseOffset.value + step.value}px)`; // -step -> 0
+      ? `translateX(${baseOffset.value - step.value}px)`
+      : `translateX(${baseOffset.value + step.value}px)`;
 
   const el = strip.value;
   if (!el) {
@@ -95,10 +89,8 @@ function shift(by: 1 | -1) {
 
   const onEnd = () => {
     el.removeEventListener("transitionend", onEnd);
-    // Rotate head after motion
     const len = props.items.length;
     head.value = (head.value + by + len) % len;
-    // Snap back to resting position without visible jump
     resetTransform();
     animating.value = false;
   };
