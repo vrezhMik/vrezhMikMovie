@@ -23,6 +23,22 @@ function formatToMonthYear(dateStr?: string) {
     year: "numeric",
   }).format(d);
 }
+import { useFavorites } from "@/shared/favorites/useFavorites";
+import { ref, onMounted } from "vue";
+
+const fav = useFavorites();
+const liked = ref(false);
+
+onMounted(async () => {
+  liked.value = await fav.isLiked(props.movie.id);
+});
+
+async function toggleLike(e: MouseEvent) {
+  e.preventDefault();
+  e.stopPropagation();
+  await fav.toggle(props.movie);
+  liked.value = await fav.isLiked(props.movie.id);
+}
 </script>
 
 <template>
@@ -50,8 +66,15 @@ function formatToMonthYear(dateStr?: string) {
           class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
         >
           <button
-            class="inline-flex items-center justify-center rounded-full transition-all duration-300 transform-gpu bg-card/60 backdrop-blur-sm text-muted-foreground border border-white/10 hover:bg-card-hover hover:text-foreground h-8 w-8"
-            aria-label="Add to favorites"
+            class="inline-flex items-center justify-center rounded-full transition-all duration-300 transform-gpu bg-card/60 backdrop-blur-sm border border-white/10 h-8 w-8"
+            :class="
+              liked
+                ? 'text-rose-500 bg-rose-500/10'
+                : 'text-muted-foreground hover:bg-card-hover hover:text-foreground'
+            "
+            aria-label="Toggle favorite"
+            :aria-pressed="liked"
+            @click="toggleLike"
           >
             <LikeIcon />
           </button>

@@ -22,6 +22,17 @@ function formatRuntime(minutes: number): string {
   if (h > 0) return `${h}h`;
   return `${m}min`;
 }
+import { ref, onMounted } from "vue";
+import { useFavorites } from "@/shared/favorites/useFavorites";
+const fav = useFavorites();
+const liked = ref(false);
+onMounted(async () => {
+  liked.value = await fav.isLiked(props.movie.id);
+});
+async function toggleLike() {
+  await fav.toggle(props.movie);
+  liked.value = await fav.isLiked(props.movie.id);
+}
 </script>
 <template>
   <div class="grid lg:grid-cols-3 gap-8 mb-12">
@@ -83,7 +94,18 @@ function formatRuntime(minutes: number): string {
           >
             <div style="transform: none">
               <div style="display: contents">
-                <LikeIcon />
+                <button
+                  aria-label="Toggle favorite"
+                  class="inline-flex items-center justify-center rounded-full transition-all duration-300 transform-gpu border border-white/10 h-12 w-12"
+                  :class="
+                    liked
+                      ? 'bg-rose-500/20 text-rose-500'
+                      : 'bg-card/60 backdrop-blur-sm text-muted-foreground hover:bg-card-hover hover:text-foreground'
+                  "
+                  @click="toggleLike"
+                >
+                  <LikeIcon />
+                </button>
               </div>
             </div>
           </button>

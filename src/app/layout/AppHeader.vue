@@ -7,7 +7,9 @@ import LikeIcon from "@/components/icons/LikeIcon.vue";
 import LightIcon from "@/components/icons/LightIcon.vue";
 import DarkIcon from "@/components/icons/DarkIcon.vue";
 import { ref, watch } from "vue";
-
+import { useRouter } from "vue-router";
+import { computed } from "vue";
+import { useFavorites } from "@/shared/favorites/useFavorites";
 type Theme = "light" | "dark";
 
 function getInitialTheme(): Theme {
@@ -36,6 +38,14 @@ function toggleTheme() {
 function isThemeDark() {
   return theme.value === "dark";
 }
+
+const router = useRouter();
+const fav = useFavorites();
+const favCount = computed(() => fav.count.value);
+
+function goFavorites() {
+  router.push({ name: "favorites" });
+}
 </script>
 
 <template>
@@ -58,14 +68,22 @@ function isThemeDark() {
           <SearchBar />
         </div>
         <div class="flex items-center gap-2">
-          <HeaderButton :icon="LikeIcon" :method="() => console.log('Like')" />
+          <div class="relative">
+            <HeaderButton :icon="LikeIcon" :method="goFavorites" />
+            <span
+              v-if="favCount"
+              class="absolute -top-1 -right-1 text-[10px] leading-none px-1.5 py-[2px] rounded-full bg-pink-500 text-white"
+            >
+              {{ favCount }}
+            </span>
+          </div>
           <HeaderButton
             :icon="isThemeDark() ? LightIcon : DarkIcon"
             :method="toggleTheme"
           />
         </div>
       </div>
-      <div class="flex-1 max-w-xl block md:hidden">
+      <div class="mt-2 flex-1 max-w-xl block md:hidden mx-auto">
         <SearchBar />
       </div>
     </div>
