@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T">
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, ref, watch, onMounted, onBeforeUnmount } from "vue";
 import SectionTitle from "@/components/UI/SectionTitle.vue";
 import TrendingIcon from "@/components/icons/TrendingIcon.vue";
 import SliderButtonIcon from "@/components/icons/SliderButtonIcon.vue";
@@ -12,6 +12,10 @@ const props = withDefaults(
     itemWidthPx?: number;
     loop?: boolean;
     title?: string;
+    autoplay?: boolean;
+    intervalMs?: number;
+    pauseOnHover?: boolean;
+    swipeThresholdPx?: number;
   }>(),
   {
     visible: 4,
@@ -19,9 +23,18 @@ const props = withDefaults(
     itemWidthPx: 288,
     loop: true,
     title: "Carousel",
+    autoplay: false,
+    intervalMs: 3500,
+    pauseOnHover: true,
+    swipeThresholdPx: 40,
   }
 );
 
+const emit = defineEmits<{
+  (e: "shift", head: number): void;
+}>();
+
+const root = ref<HTMLElement | null>(null);
 const strip = ref<HTMLDivElement | null>(null);
 const animating = ref(false);
 const head = ref(0);
@@ -52,13 +65,8 @@ function resetTransform() {
   transform.value = `translateX(${baseOffset.value}px)`;
 }
 
-onMounted(() => {
-  resetTransform();
-});
-
-watch(step, () => {
-  resetTransform();
-});
+onMounted(resetTransform);
+watch(step, resetTransform);
 
 function shift(by: 1 | -1) {
   if (animating.value || props.items.length <= 1) return;
@@ -72,7 +80,6 @@ function shift(by: 1 | -1) {
   }
 
   animating.value = true;
-
   transition.value = "transform 350ms var(--transition-smooth)";
   transform.value =
     by === 1
@@ -92,6 +99,7 @@ function shift(by: 1 | -1) {
     head.value = (head.value + by + len) % len;
     resetTransform();
     animating.value = false;
+    emit("shift", head.value);
   };
   el.addEventListener("transitionend", onEnd, { once: true });
 }
@@ -109,8 +117,110 @@ watch(
     animating.value = false;
     head.value = 0;
     resetTransform();
+    restartAutoplay();
   }
 );
+
+let timer: number | null = null;
+const hovering = ref(false);
+
+function startAutoplay() {
+  stopAutoplay();
+  if (!props.autoplay) return;
+  const canMove = props.loop || props.items.length > (props.visible ?? 1);
+  if (!canMove) return;
+  timer = window.setInterval(() => {
+    if (document.hidden) return;
+    if (props.pauseOnHover && hovering.value) return;
+    next();
+  }, props.intervalMs);
+}
+
+function stopAutoplay() {
+  if (timer !== null) {
+    window.clearInterval(timer);
+    timer = null;
+  }
+}
+function restartAutoplay() {
+  stopAutoplay();
+  startAutoplay();
+}
+
+function onMouseEnter() {
+  hovering.value = true;
+}
+function onMouseLeave() {
+  hovering.value = false;
+}
+
+document.addEventListener("visibilitychange", restartAutoplay);
+
+onMounted(startAutoplay);
+onBeforeUnmount(() => {
+  stopAutoplay();
+  document.removeEventListener("visibilitychange", restartAutoplay);
+});
+
+let dragging = false;
+let startX = 0;
+let deltaX = 0;
+
+function onPointerDown(e: PointerEvent) {
+  if (animating.value) return;
+  dragging = true;
+  startX = e.clientX;
+  deltaX = 0;
+
+  root.value?.setPointerCapture?.(e.pointerId);
+  transition.value = "";
+}
+
+function onPointerMove(e: PointerEvent) {
+  if (!dragging) return;
+  deltaX = e.clientX - startX;
+
+  transform.value = `translateX(${baseOffset.value + deltaX}px)`;
+}
+
+function onPointerUp(e: PointerEvent) {
+  if (!dragging) return;
+  dragging = false;
+
+  try {
+    root.value?.releasePointerCapture?.(e.pointerId);
+  } catch {}
+
+  const threshold = props.swipeThresholdPx ?? 40;
+  if (Math.abs(deltaX) >= threshold) {
+    shift(deltaX > 0 ? -1 : 1);
+  } else {
+    resetTransform();
+  }
+}
+
+function onTouchStart(e: TouchEvent) {
+  if (animating.value) return;
+  dragging = true;
+  startX = e.touches[0]?.clientX ?? 0;
+  deltaX = 0;
+  transition.value = "";
+}
+function onTouchMove(e: TouchEvent) {
+  if (!dragging) return;
+  deltaX = (e.touches[0]?.clientX ?? 0) - startX;
+  transform.value = `translateX(${baseOffset.value + deltaX}px)`;
+}
+function onTouchEnd() {
+  if (!dragging) return;
+  dragging = false;
+  const threshold = props.swipeThresholdPx ?? 40;
+  if (Math.abs(deltaX) >= threshold) {
+    shift(deltaX > 0 ? -1 : 1);
+  } else {
+    resetTransform();
+  }
+}
 </script>
 
 <template>
@@ -126,14 +236,24 @@ watch(
       </slot>
     </div>
 
-    <div class="relative group overflow-hidden">
+    <div
+      class="relative group overflow-hidden select-none touch-pan-y"
+      ref="root"
+      @mouseenter="props.pauseOnHover ? onMouseEnter() : null"
+      @mouseleave="props.pauseOnHover ? onMouseLeave() : null"
+      @pointerdown.passive="onPointerDown"
+      @pointermove.passive="onPointerMove"
+      @pointerup.passive="onPointerUp"
+      @touchstart.passive="onTouchStart"
+      @touchmove.passive="onTouchMove"
+      @touchend.passive="onTouchEnd"
+    >
       <div
         ref="strip"
         data-carousel
         class="flex pb-4 will-change-transform transform-gpu"
         :style="{ gap: (gapPx ?? 0) + 'px', transform, transition }"
       >
-        a
         <div
           v-for="(idx, slot) in visibleIndices"
           :key="slot"
@@ -147,14 +267,23 @@ watch(
         :disabled="animating"
         class="inline-flex items-center justify-center h-10 w-10 absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10 disabled:opacity-40 disabled:cursor-not-allowed"
         aria-label="Scroll left"
+        @pointerdown.stop
+        @pointerup.stop
+        @touchstart.stop
+        @touchend.stop
         @click="prev"
       >
         <SliderButtonIcon />
       </button>
+
       <button
         :disabled="animating"
         class="inline-flex items-center justify-center h-10 w-10 absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10 disabled:opacity-40 disabled:cursor-not-allowed"
         aria-label="Scroll right"
+        @pointerdown.stop
+        @pointerup.stop
+        @touchstart.stop
+        @touchend.stop
         @click="next"
       >
         <SliderButtonIcon class="rotate-180" />

@@ -52,6 +52,9 @@ onMounted(load);
       :gap-px="16"
       :item-width-px="288"
       title="Trending Now"
+      :autoplay="true"
+      :interval-ms="1500"
+      :pause-on-hover="true"
     >
       <template #item="{ item }">
         <RouterLink

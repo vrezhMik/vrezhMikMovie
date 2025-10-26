@@ -6,8 +6,7 @@ import SingleBanner from "@/features/single-banner/SingleBanner.vue";
 import BackIcon from "@/components/icons/BackIcon.vue";
 import SingleMovie from "@/components/UI/SingleMovie.vue";
 import CastList from "@/components/UI/CastList.vue";
-import TrailerList from "@/components/UI/TrailerList.vue";
-
+import TrailerCarousel from "@/features/trailer-carousel/TrailerCarousel.vue";
 import SkeletonBanner from "@/components/UI/skeleton/SkeletonBanner.vue";
 import SkeletonSingleMovie from "@/components/UI/skeleton/SkeletonSingleMovie.vue";
 import SkeletonRowThumbs from "@/components/UI/skeleton/SkeletonRowThumbs.vue";
@@ -130,7 +129,11 @@ function goBack() {
         <h2 class="text-2xl font-display font-semibold text-foreground mb-6">
           Trailers &amp; Videos
         </h2>
-        <TrailerList :videos="videos" />
+        <TrailerCarousel
+          :videos="videos"
+          :autoplay="true"
+          :interval-ms="1500"
+        />
       </section>
 
       <section class="mb-12" v-else-if="movie">
