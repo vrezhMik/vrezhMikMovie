@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import DateIcon from "../icons/DateIcon.vue";
-import LikeIcon from "../icons/LikeIcon.vue";
-import type { TmdbMovie } from "../../shared/api/tmdb";
+import DateIcon from "@/components/icons/DarkIcon.vue";
+import LikeIcon from "@/components/icons/LikeIcon.vue";
+import type { TmdbMovie } from "@/shared/api/tmdb";
 import { computed } from "vue";
 
 const props = defineProps<{ movie: TmdbMovie }>();

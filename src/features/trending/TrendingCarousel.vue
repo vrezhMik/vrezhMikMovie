@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { RouterLink } from "vue-router";
-import ObjectPoolCarousel from "../carousel/ObjectPoolCarousel.vue";
-import DateIcon from "../../components/icons/DateIcon.vue";
-import { trendingMovies, type TmdbMovie } from "../../shared/api/tmdb";
+import ObjectPoolCarousel from "@/features/carousel/ObjectPoolCarousel.vue";
+import DateIcon from "@/components/icons/DateIcon.vue";
+import { trendingMovies, type TmdbMovie } from "@/shared/api/tmdb";
 
 const trending = ref<TmdbMovie[]>([]);
 const loading = ref(false);

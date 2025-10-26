@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import SearchBarIcon from "../../components/icons/SearchBarIcon.vue";
+import SearchBarIcon from "@/components/icons/SearchBarIcon.vue";
 
 const isFocused = ref(false);
 const isHovered = ref(false);

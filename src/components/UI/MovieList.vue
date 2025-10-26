@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
-import SectionTitle from "../../components/UI/SectionTitle.vue";
-import MovieCard from "../../components/UI/MovieCard.vue";
-import MovieIcon from "../../components/icons/MovieIcon.vue";
+import SectionTitle from "@/components/UI/SectionTitle.vue";
+import MovieCard from "@/components/UI/MovieCard.vue";
+import MovieIcon from "@/components/icons/MovieIcon.vue";
 import {
   discoverMovies,
   type TmdbMovie,
   type TmdbPaginated,
-} from "../../shared/api/tmdb";
+} from "@/shared/api/tmdb";
 
 const movies = ref<TmdbMovie[]>([]);
 const loadingInitial = ref(false);

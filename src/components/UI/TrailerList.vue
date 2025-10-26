@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import type { TmdbVideo } from "../../shared/api/tmdb";
-import PlayIcon from "../icons/PlayIcon.vue";
-defineProps<{
-  videos: TmdbVideo[];
+import type { TmdbVideo } from "@/shared/api/tmdb";
+
+const props = defineProps<{
+  videos: ReadonlyArray<TmdbVideo>;
 }>();
 
 const playing = ref<Set<string>>(new Set());
@@ -14,6 +14,7 @@ function play(videoId: string) {
 function isPlaying(videoId: string) {
   return playing.value.has(videoId);
 }
+
 function ytThumb(key?: string) {
   return key ? `https://img.youtube.com/vi/${key}/hqdefault.jpg` : "";
 }
@@ -23,12 +24,12 @@ function ytEmbed(key?: string) {
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative" v-if="props.videos && props.videos.length">
     <div
       class="flex gap-4 overflow-x-auto custom-scrollbar pb-4 snap-x snap-mandatory"
     >
       <div
-        v-for="v in videos"
+        v-for="v in props.videos"
         :key="v.id"
         class="group relative flex-shrink-0 w-72 h-40 rounded-xl overflow-hidden snap-start bg-muted transition-all duration-300 hover:shadow-xl hover:shadow-primary/20"
       >
@@ -47,7 +48,16 @@ function ytEmbed(key?: string) {
             <div
               class="w-16 h-16 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-primary transition-all duration-300 shadow-lg"
             >
-              <PlayIcon />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="h-8 w-8 text-primary-foreground ml-1"
+              >
+                <path
+                  d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"
+                />
+              </svg>
             </div>
           </button>
 

@@ -1,28 +1,30 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import SingleBanner from "../../features/single-banner/SingleBanner.vue";
-import BackIcon from "../../components/icons/BackIcon.vue";
-import SingleMovie from "../../components/UI/SingleMovie.vue";
-import CastList from "../../components/UI/CastList.vue";
-import TrailerList from "../../components/UI/TrailerList.vue";
+import SingleBanner from "@/features/single-banner/SingleBanner.vue";
+import BackIcon from "@/components/icons/BackIcon.vue";
+import SingleMovie from "@/components/UI/SingleMovie.vue";
+import CastList from "@/components/UI/CastList.vue";
+import TrailerList from "@/components/UI/TrailerList.vue";
 import {
   getMovieByIdWithExtras,
   getMovieVideos,
   type TmdbMovieFull,
   type TmdbVideo,
-} from "../../shared/api/tmdb";
+} from "@/shared/api/tmdb";
+
+const props = defineProps<{ id?: string | number }>();
 
 const route = useRoute();
 const router = useRouter();
-const id = computed(() => Number(route.params.id));
+
+const id = computed(() => Number(props.id ?? route.params.id));
 
 const movie = ref<TmdbMovieFull | null>(null);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
 const topCast = computed(() => movie.value?.credits?.cast?.slice(0, 10) ?? []);
-
 const videos = computed<TmdbVideo[]>(() => movie.value?.videos?.results ?? []);
 
 onMounted(async () => {
@@ -65,14 +67,22 @@ function goBack() {
 
     <SingleMovie :movie="movie" v-if="movie" />
 
-    <section class="mb-12" style="opacity: 1; transform: none">
+    <section
+      class="mb-12"
+      style="opacity: 1; transform: none"
+      v-if="topCast.length"
+    >
       <h2 class="text-2xl font-display font-semibold text-foreground mb-6">
         Cast
       </h2>
       <CastList :items="topCast" />
     </section>
 
-    <section class="mb-12" style="opacity: 1; transform: none">
+    <section
+      class="mb-12"
+      style="opacity: 1; transform: none"
+      v-if="videos.length"
+    >
       <h2 class="text-2xl font-display font-semibold text-foreground mb-6">
         Trailers &amp; Videos
       </h2>

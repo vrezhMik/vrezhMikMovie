@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TMDB_IMG } from "../../shared/api/tmdb";
+import { TMDB_IMG } from "@/shared/api/tmdb";
 import { computed } from "vue";
 const props = defineProps<{
   backdrop_path?: string | null;

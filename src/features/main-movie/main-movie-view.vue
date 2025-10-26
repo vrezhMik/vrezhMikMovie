@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import MovieList from "../../components/UI/MovieList.vue";
-import TrendingCarousel from "../trending/TrendingCarousel.vue";
+import MovieList from "@/components/UI/MovieList.vue";
+import TrendingCarousel from "@/features/trending/TrendingCarousel.vue";
 </script>
 
 <template>

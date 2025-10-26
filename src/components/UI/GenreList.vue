@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TmdbGenre } from "../../shared/api/tmdb";
+import type { TmdbGenre } from "@/shared/api/tmdb";
 
 const props = defineProps<{
   genres: TmdbGenre[];

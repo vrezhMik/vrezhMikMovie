@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-import MovieIcon from "../../components/icons/MovieIcon.vue";
-import SearchBar from "../../features/search-bar/SearchBar.vue";
-import HeaderButton from "../../components/UI/HeaderButton.vue";
-import LikeIcon from "../../components/icons/LikeIcon.vue";
-import LightIcon from "../../components/icons/LightIcon.vue";
-import DarkIcon from "../../components/icons/DarkIcon.vue";
+import MovieIcon from "@/components/icons/MovieIcon.vue";
+import SearchBar from "@/features/search-bar/SearchBar.vue";
+import HeaderButton from "@/components/UI/HeaderButton.vue";
+import LikeIcon from "@/components/icons/LikeIcon.vue";
+import LightIcon from "@/components/icons/LightIcon.vue";
+import DarkIcon from "@/components/icons/DarkIcon.vue";
 import { ref, watch } from "vue";
 
 type Theme = "light" | "dark";

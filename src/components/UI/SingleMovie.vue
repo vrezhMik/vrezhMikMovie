@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import type { TmdbMovieFull } from "../../shared/api/tmdb";
+import DateIcon from "@/components/icons/DateIcon.vue";
+import LikeIcon from "@/components/icons/LikeIcon.vue";
+import TimeIcon from "@/components/icons/TimeIcon.vue";
+import type { TmdbMovieFull } from "@/shared/api/tmdb";
 const props = defineProps<{ movie: TmdbMovieFull }>();
 function formatToMonthYear(dateStr?: string) {
   if (!dateStr) return "";

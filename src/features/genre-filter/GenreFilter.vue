@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { getMovieGenres, type TmdbGenre } from "../../shared/api/tmdb";
-import GenreList from "../../components/UI/GenreList.vue";
-import GenreMobileView from "../../components/UI/GenreMobileView.vue";
+import { getMovieGenres, type TmdbGenre } from "@/shared/api/tmdb";
+import GenreList from "@/components/UI/GenreList.vue";
+import GenreMobileView from "@/components/UI/GenreMobileView.vue";
 
 const props = withDefaults(
   defineProps<{

@@ -1,8 +1,8 @@
 <script setup lang="ts" generic="T">
 import { computed, ref, watch, onMounted } from "vue";
-import SectionTitle from "../../components/UI/SectionTitle.vue";
-import TrendingIcon from "../../components/icons/TrendingIcon.vue";
-import SliderButtonIcon from "../../components/icons/SliderButtonIcon.vue";
+import SectionTitle from "@/components/UI/SectionTitle.vue";
+import TrendingIcon from "@/components/icons/TrendingIcon.vue";
+import SliderButtonIcon from "@/components/icons/SliderButtonIcon.vue";
 
 const props = withDefaults(
   defineProps<{

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import ArrowIcon from "../../components/icons/ArrowIcon.vue";
-import type { TmdbGenre } from "../../shared/api/tmdb";
+import ArrowIcon from "@/components/icons/ArrowIcon.vue";
+import type { TmdbGenre } from "@/shared/api/tmdb";
 
 const props = defineProps<{
   genres: TmdbGenre[];
