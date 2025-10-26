@@ -74,7 +74,6 @@ onMounted(load);
               class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
             />
 
-            <!-- rating badge -->
             <div class="absolute top-3 left-3">
               <div
                 :class="[
@@ -86,7 +85,6 @@ onMounted(load);
               </div>
             </div>
 
-            <!-- text overlay -->
             <div class="absolute bottom-0 left-0 right-0 p-4 on-media">
               <h3
                 class="text-foreground font-display font-semibold text-lg mb-2 line-clamp-2"

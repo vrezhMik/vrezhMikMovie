@@ -63,7 +63,6 @@ watch(step, () => {
 function shift(by: 1 | -1) {
   if (animating.value || props.items.length <= 1) return;
 
-  // Non-loop edges
   if (
     !props.loop &&
     ((by === 1 && head.value + (props.visible ?? 0) >= props.items.length) ||

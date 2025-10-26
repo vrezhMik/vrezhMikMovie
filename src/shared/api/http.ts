@@ -22,6 +22,7 @@ export async function tmdbGet<T>(
 
     const key = cacheKey(url.toString());
 
+
     const cached = cacheGet<T>(key);
     if (cached) return cached;
 
