@@ -39,12 +39,17 @@ const strip = ref<HTMLDivElement | null>(null);
 const animating = ref(false);
 const head = ref(0);
 
-const step = computed(() => (props.itemWidthPx ?? 0) + (props.gapPx ?? 0));
-const baseOffset = computed(() => -step.value);
+const isStatic = computed(() => props.items.length <= (props.visible ?? 1));
 
-const poolSize = computed(() =>
-  Math.min(props.items.length, (props.visible ?? 0) + 2)
+const step = computed(() =>
+  isStatic.value ? 0 : (props.itemWidthPx ?? 0) + (props.gapPx ?? 0)
 );
+const baseOffset = computed(() => (isStatic.value ? 0 : -step.value));
+
+const poolSize = computed(() => {
+  const len = props.items.length;
+  return isStatic.value ? len : Math.min(len, (props.visible ?? 0) + 2);
+});
 
 const visibleIndices = computed<number[]>(() => {
   const len = props.items.length;
@@ -64,9 +69,10 @@ function resetTransform() {
 }
 
 onMounted(resetTransform);
-watch(step, resetTransform);
+watch([step, () => props.items.length], resetTransform);
 
 function shift(by: 1 | -1) {
+  if (isStatic.value) return;
   if (animating.value || props.items.length <= 1) return;
 
   if (
@@ -125,6 +131,7 @@ const hovering = ref(false);
 function startAutoplay() {
   stopAutoplay();
   if (!props.autoplay) return;
+  if (isStatic.value) return;
   const canMove = props.loop || props.items.length > (props.visible ?? 1);
   if (!canMove) return;
 
@@ -171,6 +178,7 @@ let deltaX = 0;
 const dragStartThreshold = 10;
 
 function beginDrag(x: number) {
+  if (isStatic.value) return false;
   if (animating.value) return false;
   pointerDown = true;
   dragging = false;
@@ -208,12 +216,10 @@ function endDrag() {
 }
 
 function onPointerDown(e: PointerEvent) {
-  if (!usePointer.value) return;
-  if (!beginDrag(e.clientX)) return;
+  if (usePointer.value) beginDrag(e.clientX);
 }
 function onPointerMove(e: PointerEvent) {
-  if (!usePointer.value) return;
-  progressDrag(e.clientX, e.pointerId);
+  if (usePointer.value) progressDrag(e.clientX, e.pointerId);
 }
 function onPointerUp(e: PointerEvent) {
   if (!usePointer.value) return;
@@ -233,7 +239,7 @@ function onPointerCancel() {
 function onTouchStart(e: TouchEvent) {
   if (usePointer.value) return;
   const x = e.touches[0]?.clientX ?? 0;
-  if (!beginDrag(x)) return;
+  beginDrag(x);
 }
 function onTouchMove(e: TouchEvent) {
   if (usePointer.value) return;
@@ -242,8 +248,7 @@ function onTouchMove(e: TouchEvent) {
   if (dragging && e.cancelable) e.preventDefault();
 }
 function onTouchEnd() {
-  if (usePointer.value) return;
-  endDrag();
+  if (!usePointer.value) endDrag();
 }
 function onTouchCancel() {
   if (usePointer.value) return;
@@ -285,6 +290,10 @@ function onTouchCancel() {
         ref="strip"
         data-carousel
         class="flex pb-4 will-change-transform transform-gpu"
+        :class="{
+          'justify-start': !isStatic,
+          'justify-start md:justify-start': isStatic,
+        }"
         :style="{ gap: (gapPx ?? 0) + 'px', transform, transition }"
       >
         <div
@@ -297,6 +306,7 @@ function onTouchCancel() {
       </div>
 
       <button
+        v-if="!isStatic"
         :disabled="animating"
         class="inline-flex items-center justify-center h-10 w-10 absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10 disabled:opacity-40 disabled:cursor-not-allowed"
         aria-label="Scroll left"
@@ -310,6 +320,7 @@ function onTouchCancel() {
       </button>
 
       <button
+        v-if="!isStatic"
         :disabled="animating"
         class="inline-flex items-center justify-center h-10 w-10 absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10 disabled:opacity-40 disabled:cursor-not-allowed"
         aria-label="Scroll right"
