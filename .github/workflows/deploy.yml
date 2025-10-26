@@ -1,27 +1,53 @@
-services:
-  web:
-    build:
-      context: .
-      target: dev
-    container_name: movie_web
-    ports:
-      - "5173:5173"
-    env_file:
-      - .env.local
-    volumes:
-      - ./:/app
-      # keep container's node_modules instead of overwriting with host
-      - /app/node_modules
-    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+name: Deploy to GitHub Pages
 
-  tests:
-    build:
-      context: .
-      target: test-ui
-    container_name: movie_tests
-    ports:
-      - "51204:51204"
-    volumes:
-      - ./:/app
-      - /app/node_modules
-    command: ["npm", "run", "test:ui"]
+on:
+  push:
+    branches: [main] # or your default branch
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
+          VITE_TMDB_ACCESS_TOKEN: ${{ secrets.VITE_TMDB_ACCESS_TOKEN }}
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
