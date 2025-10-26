@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SkeletonBlock from "./SkeletonBlock.vue";
 const props = withDefaults(
   defineProps<{
     count?: number;
