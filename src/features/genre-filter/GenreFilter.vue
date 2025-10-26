@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { getMovieGenres, type TmdbGenre } from "@/shared/api/tmdb";
 import GenreList from "@/components/UI/GenreList.vue";
 import GenreMobileView from "@/components/UI/GenreMobileView.vue";
@@ -32,6 +32,19 @@ function toggle(id: number) {
   emit("update:modelValue", selectedIds.value);
 }
 
+function clearAll() {
+  selected.value.clear();
+  emit("update:modelValue", []);
+}
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    selected.value = new Set(val ?? []);
+  },
+  { deep: true }
+);
+
 onMounted(async () => {
   try {
     loading.value = true;
@@ -51,7 +64,7 @@ onMounted(async () => {
 <template>
   <aside class="lg:w-64 flex-shrink-0">
     <div class="lg:sticky lg:top-24">
-      <div data-testid="genre-filter" class="w-full">
+      <div class="w-full">
         <div class="hidden lg:block">
           <GenreList
             :genres="genres"
@@ -59,6 +72,7 @@ onMounted(async () => {
             :loading="loading"
             :error="error"
             @toggle="toggle"
+            @clear="clearAll"
           />
         </div>
         <div class="lg:hidden">
@@ -68,6 +82,7 @@ onMounted(async () => {
             :loading="loading"
             :error="error"
             @toggle="toggle"
+            @clear="clearAll"
           />
         </div>
       </div>

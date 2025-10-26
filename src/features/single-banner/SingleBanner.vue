@@ -8,7 +8,7 @@ const imageUrl = computed(() => {
   if (props.backdrop_path)
     return TMDB_IMG.backdrop(props.backdrop_path, "w1280");
 
-  return "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1920&h=1080&fit=crop";
+  return "";
 });
 </script>
 <template>

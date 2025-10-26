@@ -42,7 +42,7 @@ function isThemeDark() {
   <header
     class="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl"
   >
-    <div class="container mx-auto px-4">
+    <div class="container mx-auto px-4 pb-4">
       <div class="flex h-16 items-center justify-between gap-4">
         <RouterLink to="/" class="flex items-center gap-3 group">
           <div
@@ -50,15 +50,13 @@ function isThemeDark() {
           >
             <MovieIcon class="w-5 h-5 text-white" />
           </div>
-          <h1
-            class="hidden sm:inline-block text-xl font-bold text-gradient-primary"
-          >
+          <h1 class="hidden text-xl font-bold text-gradient-primary lg:block">
             vrezhMikMovies
           </h1>
         </RouterLink>
-
-        <SearchBar />
-
+        <div class="flex-1 max-w-xl hidden md:block">
+          <SearchBar />
+        </div>
         <div class="flex items-center gap-2">
           <HeaderButton :icon="LikeIcon" :method="() => console.log('Like')" />
           <HeaderButton
@@ -66,6 +64,9 @@ function isThemeDark() {
             :method="toggleTheme"
           />
         </div>
+      </div>
+      <div class="flex-1 max-w-xl block md:hidden">
+        <SearchBar />
       </div>
     </div>
   </header>
