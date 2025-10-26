@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "5173:5173"
+    env_file: [.env.local]
+    environment:
+      - ROLLUP_SKIP_NODEJS_NATIVE=1
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+  testui:
+    build:
+      context: .
+      target: test-ui
+    ports:
+      - "51204:51204"
+    env_file: [.env.local]
+    environment:
+      - ROLLUP_SKIP_NODEJS_NATIVE=1
+    command: ["npm", "run", "test:ui"] # 👈 no extra flags here
