@@ -1,18 +1,31 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  nextTick,
+  computed,
+} from "vue";
 import SectionTitle from "@/components/UI/SectionTitle.vue";
 import MovieCard from "@/components/UI/MovieCard.vue";
 import MovieIcon from "@/components/icons/MovieIcon.vue";
 import SkeletonMovieCard from "@/components/UI/skeleton/SkeletonMovieCard.vue";
 import {
   discoverMovies,
+  searchMovies,
   type TmdbMovie,
   type TmdbPaginated,
 } from "@/shared/api/tmdb";
+import { useSearchQuery } from "@/shared/search/useSearch";
 
 const props = withDefaults(defineProps<{ genres?: number[] }>(), {
   genres: () => [],
 });
+
+// GLOBAL search query from header
+const queryRef = useSearchQuery();
+const query = computed(() => queryRef.value?.trim() ?? "");
 
 const movies = ref<TmdbMovie[]>([]);
 const loadingInitial = ref(false);
@@ -30,7 +43,11 @@ let reqId = 0;
 const sentinel = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
 
-function makeParams(page: number) {
+function isSearching() {
+  return !!query.value;
+}
+
+function makeDiscoverParams(page: number) {
   return {
     page,
     sort_by: "popularity.desc",
@@ -47,8 +64,12 @@ async function fetchPage(page: number) {
   const thisReq = reqId;
 
   const doFetch = async () => {
-    const res = await discoverMovies(makeParams(page));
-    if (thisReq !== reqId) return res;
+    const res = isSearching()
+      ? await searchMovies(query.value, { page })
+      : await discoverMovies(makeDiscoverParams(page));
+
+    if (thisReq !== reqId) return res; // ignore stale responses
+
     fetchedPages.add(page);
     currentPage.value = Math.max(currentPage.value, res.page);
     totalPages.value = res.total_pages;
@@ -108,7 +129,7 @@ function disconnectObserver() {
 }
 
 async function resetAndReload() {
-  reqId++;
+  reqId++; // invalidate previous requests
   movies.value = [];
   error.value = null;
   currentPage.value = 0;
@@ -120,6 +141,7 @@ async function resetAndReload() {
   await fetchPage(1);
   observeSentinel();
 
+  // optional prefetch of page 2
   if (!totalPages.value || 2 <= totalPages.value) fetchPage(2);
 }
 
@@ -127,16 +149,15 @@ onMounted(async () => {
   await resetAndReload();
 });
 
+// Re-run when filters OR query change
 watch(
-  () => (props.genres ?? []).join(","),
+  () => [(props.genres ?? []).join(","), query.value].join("|"),
   async () => {
     await resetAndReload();
   }
 );
 
-onBeforeUnmount(() => {
-  disconnectObserver();
-});
+onBeforeUnmount(disconnectObserver);
 </script>
 
 <template>
