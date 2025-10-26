@@ -32,9 +32,7 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits<{
-  (e: "shift", head: number): void;
-}>();
+const emit = defineEmits<{ (e: "shift", head: number): void }>();
 
 const root = ref<HTMLElement | null>(null);
 const strip = ref<HTMLDivElement | null>(null);
@@ -53,9 +51,7 @@ const visibleIndices = computed<number[]>(() => {
   if (len === 0) return [];
   const count = poolSize.value;
   const out: number[] = new Array(count);
-  for (let i = 0; i < count; i++) {
-    out[i] = (head.value + i - 1 + len) % len;
-  }
+  for (let i = 0; i < count; i++) out[i] = (head.value + i - 1 + len) % len;
   return out;
 });
 
@@ -70,6 +66,7 @@ function resetTransform() {
 onMounted(resetTransform);
 watch(step, resetTransform);
 
+/* SHIFT */
 function shift(by: 1 | -1) {
   if (animating.value || props.items.length <= 1) return;
 
@@ -113,6 +110,7 @@ function prev() {
   shift(-1);
 }
 
+/* React to list size */
 watch(
   () => props.items.length,
   () => {
@@ -123,13 +121,13 @@ watch(
   }
 );
 
+/* AUTOPLAY */
 let timer: number | null = null;
 const hovering = ref(false);
 
 function startAutoplay() {
   stopAutoplay();
   if (!props.autoplay) return;
-
   const canMove = props.loop || props.items.length > (props.visible ?? 1);
   if (!canMove) return;
 
@@ -139,7 +137,6 @@ function startAutoplay() {
     next();
   }, props.intervalMs);
 }
-
 function stopAutoplay() {
   if (timer !== null) {
     window.clearInterval(timer);
@@ -159,11 +156,16 @@ function onMouseLeave() {
 }
 
 document.addEventListener("visibilitychange", restartAutoplay);
-
 onMounted(startAutoplay);
 onBeforeUnmount(() => {
   stopAutoplay();
   document.removeEventListener("visibilitychange", restartAutoplay);
+});
+
+/* DRAG / SWIPE — prefer Pointer Events, fallback to Touch */
+const usePointer = ref(false);
+onMounted(() => {
+  usePointer.value = "PointerEvent" in window;
 });
 
 let pointerDown = false;
@@ -172,78 +174,87 @@ let startX = 0;
 let deltaX = 0;
 const dragStartThreshold = 10;
 
-function onPointerDown(e: PointerEvent) {
-  if (animating.value) return;
+function beginDrag(x: number) {
+  if (animating.value) return false;
   pointerDown = true;
   dragging = false;
-  startX = e.clientX;
+  startX = x;
   deltaX = 0;
+  return true;
 }
-
-function onPointerMove(e: PointerEvent) {
+function progressDrag(x: number, captureId?: number) {
   if (!pointerDown) return;
-  deltaX = e.clientX - startX;
+  deltaX = x - startX;
 
   if (!dragging && Math.abs(deltaX) > dragStartThreshold) {
     dragging = true;
-    try {
-      root.value?.setPointerCapture?.(e.pointerId);
-    } catch {}
     transition.value = "";
+    if (captureId != null) {
+      try {
+        root.value?.setPointerCapture?.(captureId);
+      } catch {}
+    }
   }
-
   if (dragging) {
-    e.preventDefault?.();
     transform.value = `translateX(${baseOffset.value + deltaX}px)`;
   }
 }
-
-function onPointerUp(e: PointerEvent) {
-  if (!pointerDown) return;
-
-  try {
-    root.value?.releasePointerCapture?.(e.pointerId);
-  } catch {}
-
+function endDrag() {
   const threshold = props.swipeThresholdPx ?? 40;
   if (dragging && Math.abs(deltaX) >= threshold) {
     shift(deltaX > 0 ? -1 : 1);
   } else {
     resetTransform();
   }
-
   pointerDown = false;
   dragging = false;
   deltaX = 0;
 }
 
-function onTouchStart(e: TouchEvent) {
-  if (animating.value) return;
-  pointerDown = true;
+/* Pointer handlers (only when usePointer) */
+function onPointerDown(e: PointerEvent) {
+  if (!usePointer.value) return;
+  if (!beginDrag(e.clientX)) return;
+}
+function onPointerMove(e: PointerEvent) {
+  if (!usePointer.value) return;
+  progressDrag(e.clientX, e.pointerId);
+}
+function onPointerUp(e: PointerEvent) {
+  if (!usePointer.value) return;
+  try {
+    root.value?.releasePointerCapture?.(e.pointerId);
+  } catch {}
+  endDrag();
+}
+function onPointerCancel() {
+  if (!usePointer.value) return;
+  resetTransform();
+  pointerDown = false;
   dragging = false;
-  startX = e.touches[0]?.clientX ?? 0;
   deltaX = 0;
-  transition.value = "";
+}
+
+/* Touch handlers (only when NOT usePointer) */
+function onTouchStart(e: TouchEvent) {
+  if (usePointer.value) return;
+  const x = e.touches[0]?.clientX ?? 0;
+  if (!beginDrag(x)) return;
 }
 function onTouchMove(e: TouchEvent) {
-  if (!pointerDown) return;
-  deltaX = (e.touches[0]?.clientX ?? 0) - startX;
-
-  if (!dragging && Math.abs(deltaX) > dragStartThreshold) {
-    dragging = true;
-  }
-  if (dragging) {
-    e.preventDefault?.();
-    transform.value = `translateX(${baseOffset.value + deltaX}px)`;
-  }
+  if (usePointer.value) return;
+  const x = e.touches[0]?.clientX ?? 0;
+  progressDrag(x);
+  // prevent rubber-band horizontal scroll while dragging
+  if (dragging && e.cancelable) e.preventDefault();
 }
 function onTouchEnd() {
-  const threshold = props.swipeThresholdPx ?? 40;
-  if (dragging && Math.abs(deltaX) >= threshold) {
-    shift(deltaX > 0 ? -1 : 1);
-  } else {
-    resetTransform();
-  }
+  if (usePointer.value) return;
+  endDrag();
+}
+function onTouchCancel() {
+  if (usePointer.value) return;
+  resetTransform();
   pointerDown = false;
   dragging = false;
   deltaX = 0;
@@ -264,17 +275,22 @@ function onTouchEnd() {
     </div>
 
     <div
-      class="relative group overflow-hidden select-none touch-pan-y"
       ref="root"
+      class="relative group overflow-hidden select-none touch-pan-y"
       @mouseenter="props.pauseOnHover ? onMouseEnter() : null"
       @mouseleave="props.pauseOnHover ? onMouseLeave() : null"
-      @pointerdown="onPointerDown"
-      @pointermove="onPointerMove"
-      @pointerup="onPointerUp"
-      @touchstart="onTouchStart"
-      @touchmove="onTouchMove"
-      @touchend="onTouchEnd"
+      <!--
+      Pointer
+      path
+      --
     >
+      @pointerdown="onPointerDown" @pointermove="onPointerMove"
+      @pointerup="onPointerUp" @pointercancel="onPointerCancel"
+
+      <!-- Touch fallback (only runs when PointerEvent not available) -->
+      @touchstart.passive="onTouchStart" @touchmove="onTouchMove"
+      <!-- not passive so preventDefault can work -->
+      @touchend="onTouchEnd" @touchcancel="onTouchCancel" >
       <div
         ref="strip"
         data-carousel
