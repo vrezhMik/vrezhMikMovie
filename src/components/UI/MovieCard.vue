@@ -25,6 +25,7 @@ function formatToMonthYear(dateStr?: string) {
 }
 import { useFavorites } from "@/shared/favorites/useFavorites";
 import { ref, onMounted } from "vue";
+import MovieBigIcon from "../icons/MovieBigIcon.vue";
 
 const fav = useFavorites();
 const liked = ref(false);
@@ -67,25 +68,7 @@ async function toggleLike(e: MouseEvent) {
               <div
                 class="mb-4 p-6 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 backdrop-blur-sm border border-white/10"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="lucide lucide-film h-12 w-12 text-foreground"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  viewBox="0 0 24 24"
-                >
-                  <rect width="18" height="18" x="3" y="3" rx="2" />
-                  <path d="M7 3v18" />
-                  <path d="M3 7.5h4" />
-                  <path d="M3 12h18" />
-                  <path d="M3 16.5h4" />
-                  <path d="M17 3v18" />
-                  <path d="M17 7.5h4" />
-                  <path d="M17 16.5h4" />
-                </svg>
+                <MovieBigIcon />
               </div>
 
               <div class="text-center">
