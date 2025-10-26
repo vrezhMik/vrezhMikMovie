@@ -3,6 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import SectionTitle from "@/components/UI/SectionTitle.vue";
 import MovieCard from "@/components/UI/MovieCard.vue";
 import MovieIcon from "@/components/icons/MovieIcon.vue";
+import SkeletonMovieCard from "@/components/UI/skeleton/SkeletonMovieCard.vue";
 import {
   discoverMovies,
   type TmdbMovie,
@@ -91,12 +92,13 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   if (observer && sentinel.value) observer.unobserve(sentinel.value);
+  if (observer) observer.disconnect();
   observer = null;
 });
 </script>
 
 <template>
-  <section>
+  <section aria-live="polite" aria-busy="false">
     <div class="mb-6">
       <SectionTitle
         title="More Movies"
@@ -105,31 +107,38 @@ onBeforeUnmount(() => {
         icon_style="bg-gradient-to-br from-primary to-accent"
       />
     </div>
-
-    <div v-if="error" class="text-danger">{{ error }}</div>
+    <div v-if="error" class="text-danger text-sm">
+      {{ error }}
+    </div>
 
     <div
       v-else-if="loadingInitial"
-      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
+      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6"
     >
-      <div v-for="n in 8" :key="n" class="h-40 rounded-xl skeleton-shimmer" />
+      <SkeletonMovieCard v-for="n in 8" :key="n" />
     </div>
 
-    <div v-else data-testid="movie-grid">
+    <div v-else>
+      <div v-if="!movies.length" class="py-12 text-center">
+        <p class="text-muted-foreground">No movies to show.</p>
+      </div>
+
       <div
+        v-else
         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6"
       >
         <MovieCard v-for="m in movies" :key="m.id" :movie="m" />
       </div>
 
-      <div
-        class="h-16 flex items-center justify-center mt-6"
-        v-show="loadingMore"
-      >
-        <p class="text-muted-foreground text-sm">Loading more…</p>
+      <div class="mt-6" v-show="loadingMore">
+        <div
+          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6"
+        >
+          <SkeletonMovieCard v-for="n in 4" :key="`more-${n}`" />
+        </div>
       </div>
 
-      <div ref="sentinel" style="height: 1px"></div>
+      <div ref="sentinel" class="h-1"></div>
     </div>
   </section>
 </template>

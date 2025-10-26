@@ -13,7 +13,7 @@ const imageUrl = computed(() => {
 </script>
 <template>
   <div
-    class="relative w-full h-96 bg-cover bg-center rounded-2xl overflow-hidden"
+    class="relative w-full h-96 bg-cover bg-center overflow-hidden"
     :style="{ backgroundImage: `url(${imageUrl})` }"
   >
     <div
