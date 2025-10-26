@@ -47,3 +47,66 @@ The app is deployed on **GitHub Pages** here:
 git clone https://github.com/vrezhmik/vrezhMikMovie.git
 cd vrezhMikMovie
 ```
+
+### 2️⃣ Make the startup script executable
+
+```
+chmod +x scripts/start-dev.sh
+```
+
+### 3️⃣ Run the project
+
+This command will:
+
+Create a .env.local file (if it doesn’t exist)
+
+Prompt you for your TMDB credentials
+
+Start both the Vite dev server and Vitest UI inside Docker containers
+
+Automatically open both in your browser
+
+```
+./scripts/start-dev.sh
+```
+
+### 4️⃣ When prompted, enter your TMDB credentials:
+
+You’ll need two keys from your TMDB account:
+
+```
+VITE_TMDB_ACCESS_TOKEN=<your_access_token>
+VITE_TMDB_API_KEY=<your_api_key>
+```
+
+These will be stored securely in a local .env.local file (not committed to Git).
+
+### 🧪 Testing
+
+After the script runs, open the test dashboard:
+👉 http://localhost:51204
+
+Vitest UI provides a live view of running tests, coverage, and logs.
+
+### 🐳 Docker Info
+
+Service Description Port
+
+app Vite dev server 5173
+
+testui Vitest UI dashboard 51204
+
+To manually rebuild and run:
+
+```
+docker compose up -d --build
+```
+
+### 🌐 Deployment
+
+The app is automatically built and deployed to GitHub Pages via Vite’s static site output.
+All components and assets are optimized for production, and API keys are securely injected at build time using GitHub secrets.
+
+### 📄 License
+
+MIT License © 2025 <a href="https://github.com/vrezhmik">Vrezh Mik</a>
