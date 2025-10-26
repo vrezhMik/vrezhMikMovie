@@ -47,16 +47,56 @@ async function toggleLike(e: MouseEvent) {
   >
     <RouterLink :to="`/movie/${props.movie.id}`">
       <div class="relative aspect-[2/3] overflow-hidden bg-muted">
-        <img
-          :alt="props.movie.title"
-          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          loading="lazy"
-          :src="
-            props.movie.poster_path
-              ? `https://image.tmdb.org/t/p/w342${props.movie.poster_path}`
-              : ''
-          "
-        />
+        <template v-if="props.movie.poster_path">
+          <img
+            :alt="props.movie.title"
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+            :src="`https://image.tmdb.org/t/p/w342${props.movie.poster_path}`"
+          />
+        </template>
+        <template v-else>
+          <div
+            class="relative w-full h-full bg-gradient-to-br from-primary/20 via-accent/10 to-muted flex flex-col items-center justify-center p-6"
+          >
+            <div
+              class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30"
+            ></div>
+
+            <div class="relative z-10 flex flex-col items-center">
+              <div
+                class="mb-4 p-6 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 backdrop-blur-sm border border-white/10"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="lucide lucide-film h-12 w-12 text-foreground"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  viewBox="0 0 24 24"
+                >
+                  <rect width="18" height="18" x="3" y="3" rx="2" />
+                  <path d="M7 3v18" />
+                  <path d="M3 7.5h4" />
+                  <path d="M3 12h18" />
+                  <path d="M3 16.5h4" />
+                  <path d="M17 3v18" />
+                  <path d="M17 7.5h4" />
+                  <path d="M17 16.5h4" />
+                </svg>
+              </div>
+
+              <div class="text-center">
+                <p class="text-sm font-medium text-foreground mb-1">
+                  No Image Available
+                </p>
+                <p class="text-xs text-muted-foreground">Poster coming soon</p>
+              </div>
+            </div>
+          </div>
+        </template>
 
         <div
           class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -92,7 +132,7 @@ async function toggleLike(e: MouseEvent) {
         </div>
 
         <div
-          class="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 on-media"
+          class="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 on-media z-10"
         >
           <h3
             class="text-foreground font-display font-semibold text-lg mb-2 line-clamp-2"

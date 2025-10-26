@@ -126,9 +126,6 @@ function goBack() {
       </section>
 
       <section class="mb-12" v-if="videos.length">
-        <h2 class="text-2xl font-display font-semibold text-foreground mb-6">
-          Trailers &amp; Videos
-        </h2>
         <TrailerCarousel
           :videos="videos"
           :autoplay="true"

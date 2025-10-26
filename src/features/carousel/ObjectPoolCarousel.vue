@@ -12,9 +12,11 @@ const props = withDefaults(
     itemWidthPx?: number;
     loop?: boolean;
     title?: string;
+
     autoplay?: boolean;
     intervalMs?: number;
     pauseOnHover?: boolean;
+
     swipeThresholdPx?: number;
   }>(),
   {
@@ -127,8 +129,10 @@ const hovering = ref(false);
 function startAutoplay() {
   stopAutoplay();
   if (!props.autoplay) return;
+
   const canMove = props.loop || props.items.length > (props.visible ?? 1);
   if (!canMove) return;
+
   timer = window.setInterval(() => {
     if (document.hidden) return;
     if (props.pauseOnHover && hovering.value) return;
@@ -162,64 +166,87 @@ onBeforeUnmount(() => {
   document.removeEventListener("visibilitychange", restartAutoplay);
 });
 
+let pointerDown = false;
 let dragging = false;
 let startX = 0;
 let deltaX = 0;
+const dragStartThreshold = 10;
 
 function onPointerDown(e: PointerEvent) {
   if (animating.value) return;
-  dragging = true;
+  pointerDown = true;
+  dragging = false;
   startX = e.clientX;
   deltaX = 0;
-
-  root.value?.setPointerCapture?.(e.pointerId);
-  transition.value = "";
 }
 
 function onPointerMove(e: PointerEvent) {
-  if (!dragging) return;
+  if (!pointerDown) return;
   deltaX = e.clientX - startX;
 
-  transform.value = `translateX(${baseOffset.value + deltaX}px)`;
+  if (!dragging && Math.abs(deltaX) > dragStartThreshold) {
+    dragging = true;
+    try {
+      root.value?.setPointerCapture?.(e.pointerId);
+    } catch {}
+    transition.value = "";
+  }
+
+  if (dragging) {
+    e.preventDefault?.();
+    transform.value = `translateX(${baseOffset.value + deltaX}px)`;
+  }
 }
 
 function onPointerUp(e: PointerEvent) {
-  if (!dragging) return;
-  dragging = false;
+  if (!pointerDown) return;
 
   try {
     root.value?.releasePointerCapture?.(e.pointerId);
   } catch {}
 
   const threshold = props.swipeThresholdPx ?? 40;
-  if (Math.abs(deltaX) >= threshold) {
+  if (dragging && Math.abs(deltaX) >= threshold) {
     shift(deltaX > 0 ? -1 : 1);
   } else {
     resetTransform();
   }
+
+  pointerDown = false;
+  dragging = false;
+  deltaX = 0;
 }
 
 function onTouchStart(e: TouchEvent) {
   if (animating.value) return;
-  dragging = true;
+  pointerDown = true;
+  dragging = false;
   startX = e.touches[0]?.clientX ?? 0;
   deltaX = 0;
   transition.value = "";
 }
 function onTouchMove(e: TouchEvent) {
-  if (!dragging) return;
+  if (!pointerDown) return;
   deltaX = (e.touches[0]?.clientX ?? 0) - startX;
-  transform.value = `translateX(${baseOffset.value + deltaX}px)`;
+
+  if (!dragging && Math.abs(deltaX) > dragStartThreshold) {
+    dragging = true;
+  }
+  if (dragging) {
+    e.preventDefault?.();
+    transform.value = `translateX(${baseOffset.value + deltaX}px)`;
+  }
 }
 function onTouchEnd() {
-  if (!dragging) return;
-  dragging = false;
   const threshold = props.swipeThresholdPx ?? 40;
-  if (Math.abs(deltaX) >= threshold) {
+  if (dragging && Math.abs(deltaX) >= threshold) {
     shift(deltaX > 0 ? -1 : 1);
   } else {
     resetTransform();
   }
+  pointerDown = false;
+  dragging = false;
+  deltaX = 0;
 }
 </script>
 
@@ -241,12 +268,12 @@ function onTouchEnd() {
       ref="root"
       @mouseenter="props.pauseOnHover ? onMouseEnter() : null"
       @mouseleave="props.pauseOnHover ? onMouseLeave() : null"
-      @pointerdown.passive="onPointerDown"
-      @pointermove.passive="onPointerMove"
-      @pointerup.passive="onPointerUp"
-      @touchstart.passive="onTouchStart"
-      @touchmove.passive="onTouchMove"
-      @touchend.passive="onTouchEnd"
+      @pointerdown="onPointerDown"
+      @pointermove="onPointerMove"
+      @pointerup="onPointerUp"
+      @touchstart="onTouchStart"
+      @touchmove="onTouchMove"
+      @touchend="onTouchEnd"
     >
       <div
         ref="strip"

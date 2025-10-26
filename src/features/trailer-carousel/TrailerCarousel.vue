@@ -112,7 +112,7 @@ function ytEmbed(key?: string) {
             </button>
 
             <div
-              class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent"
+              class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent on-media"
             >
               <p class="text-foreground text-sm font-medium line-clamp-2">
                 {{ item.name }}
