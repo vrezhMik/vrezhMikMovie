@@ -23,7 +23,6 @@ const props = withDefaults(defineProps<{ genres?: number[] }>(), {
   genres: () => [],
 });
 
-// GLOBAL search query from header
 const queryRef = useSearchQuery();
 const query = computed(() => queryRef.value?.trim() ?? "");
 
@@ -68,7 +67,7 @@ async function fetchPage(page: number) {
       ? await searchMovies(query.value, { page })
       : await discoverMovies(makeDiscoverParams(page));
 
-    if (thisReq !== reqId) return res; // ignore stale responses
+    if (thisReq !== reqId) return res;
 
     fetchedPages.add(page);
     currentPage.value = Math.max(currentPage.value, res.page);
@@ -129,7 +128,7 @@ function disconnectObserver() {
 }
 
 async function resetAndReload() {
-  reqId++; // invalidate previous requests
+  reqId++;
   movies.value = [];
   error.value = null;
   currentPage.value = 0;
@@ -141,7 +140,6 @@ async function resetAndReload() {
   await fetchPage(1);
   observeSentinel();
 
-  // optional prefetch of page 2
   if (!totalPages.value || 2 <= totalPages.value) fetchPage(2);
 }
 
@@ -149,7 +147,6 @@ onMounted(async () => {
   await resetAndReload();
 });
 
-// Re-run when filters OR query change
 watch(
   () => [(props.genres ?? []).join(","), query.value].join("|"),
   async () => {
