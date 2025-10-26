@@ -1,4 +1,4 @@
-# 🎬 VrezhMik Movie Explorer
+# 🎬 vrezhMikMovie
 
 A responsive **Vue 3 + TypeScript** web application that lets users browse, search, and favorite movies using data from **The Movie Database (TMDB)** API.  
 It includes a test suite with a visual **Vitest UI dashboard**, and is fully containerized for local development via Docker.
