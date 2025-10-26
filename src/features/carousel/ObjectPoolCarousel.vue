@@ -12,11 +12,9 @@ const props = withDefaults(
     itemWidthPx?: number;
     loop?: boolean;
     title?: string;
-
     autoplay?: boolean;
     intervalMs?: number;
     pauseOnHover?: boolean;
-
     swipeThresholdPx?: number;
   }>(),
   {
@@ -40,17 +38,14 @@ const animating = ref(false);
 const head = ref(0);
 
 const isStatic = computed(() => props.items.length <= (props.visible ?? 1));
-
 const step = computed(() =>
   isStatic.value ? 0 : (props.itemWidthPx ?? 0) + (props.gapPx ?? 0)
 );
 const baseOffset = computed(() => (isStatic.value ? 0 : -step.value));
-
 const poolSize = computed(() => {
   const len = props.items.length;
   return isStatic.value ? len : Math.min(len, (props.visible ?? 0) + 2);
 });
-
 const visibleIndices = computed<number[]>(() => {
   const len = props.items.length;
   if (len === 0) return [];
@@ -74,29 +69,24 @@ watch([step, () => props.items.length], resetTransform);
 function shift(by: 1 | -1) {
   if (isStatic.value) return;
   if (animating.value || props.items.length <= 1) return;
-
   if (
     !props.loop &&
     ((by === 1 && head.value + (props.visible ?? 0) >= props.items.length) ||
       (by === -1 && head.value <= 0))
-  ) {
+  )
     return;
-  }
-
   animating.value = true;
   transition.value = "transform 350ms var(--transition-smooth)";
   transform.value =
     by === 1
       ? `translateX(${baseOffset.value - step.value}px)`
       : `translateX(${baseOffset.value + step.value}px)`;
-
   const el = strip.value;
   if (!el) {
     animating.value = false;
     resetTransform();
     return;
   }
-
   const onEnd = () => {
     el.removeEventListener("transitionend", onEnd);
     const len = props.items.length;
@@ -127,6 +117,25 @@ watch(
 
 let timer: number | null = null;
 const hovering = ref(false);
+const interacting = ref(false);
+let resumeTimeout: number | null = null;
+
+function onInteractionStart() {
+  interacting.value = true;
+  stopAutoplay();
+  if (resumeTimeout !== null) {
+    window.clearTimeout(resumeTimeout);
+    resumeTimeout = null;
+  }
+}
+
+function onInteractionEnd() {
+  interacting.value = false;
+  resumeTimeout = window.setTimeout(() => {
+    resumeTimeout = null;
+    restartAutoplay();
+  }, 400);
+}
 
 function startAutoplay() {
   stopAutoplay();
@@ -134,13 +143,13 @@ function startAutoplay() {
   if (isStatic.value) return;
   const canMove = props.loop || props.items.length > (props.visible ?? 1);
   if (!canMove) return;
-
   timer = window.setInterval(() => {
     if (document.hidden) return;
-    if (props.pauseOnHover && hovering.value) return;
+    if (interacting.value || dragging) return;
     next();
   }, props.intervalMs);
 }
+
 function stopAutoplay() {
   if (timer !== null) {
     window.clearInterval(timer);
@@ -180,6 +189,7 @@ const dragStartThreshold = 10;
 function beginDrag(x: number) {
   if (isStatic.value) return false;
   if (animating.value) return false;
+  onInteractionStart();
   pointerDown = true;
   dragging = false;
   startX = x;
@@ -189,7 +199,6 @@ function beginDrag(x: number) {
 function progressDrag(x: number, captureId?: number) {
   if (!pointerDown) return;
   deltaX = x - startX;
-
   if (!dragging && Math.abs(deltaX) > dragStartThreshold) {
     dragging = true;
     transition.value = "";
@@ -199,9 +208,7 @@ function progressDrag(x: number, captureId?: number) {
       } catch {}
     }
   }
-  if (dragging) {
-    transform.value = `translateX(${baseOffset.value + deltaX}px)`;
-  }
+  if (dragging) transform.value = `translateX(${baseOffset.value + deltaX}px)`;
 }
 function endDrag() {
   const threshold = props.swipeThresholdPx ?? 40;
@@ -213,10 +220,14 @@ function endDrag() {
   pointerDown = false;
   dragging = false;
   deltaX = 0;
+  onInteractionEnd();
 }
 
 function onPointerDown(e: PointerEvent) {
-  if (usePointer.value) beginDrag(e.clientX);
+  if (usePointer.value) {
+    onInteractionStart();
+    beginDrag(e.clientX);
+  }
 }
 function onPointerMove(e: PointerEvent) {
   if (usePointer.value) progressDrag(e.clientX, e.pointerId);
@@ -257,6 +268,13 @@ function onTouchCancel() {
   dragging = false;
   deltaX = 0;
 }
+
+function onFocusIn() {
+  onInteractionStart();
+}
+function onFocusOut() {
+  onInteractionEnd();
+}
 </script>
 
 <template>
@@ -274,7 +292,10 @@ function onTouchCancel() {
 
     <div
       ref="root"
+      tabindex="0"
       class="relative group overflow-hidden select-none touch-pan-y"
+      @focusin="onFocusIn"
+      @focusout="onFocusOut"
       @mouseenter="props.pauseOnHover ? onMouseEnter() : null"
       @mouseleave="props.pauseOnHover ? onMouseLeave() : null"
       @pointerdown="onPointerDown"
@@ -285,6 +306,7 @@ function onTouchCancel() {
       @touchmove="onTouchMove"
       @touchend="onTouchEnd"
       @touchcancel="onTouchCancel"
+      style="touch-action: pan-y"
     >
       <div
         ref="strip"
@@ -308,7 +330,7 @@ function onTouchCancel() {
       <button
         v-if="!isStatic"
         :disabled="animating"
-        class="inline-flex items-center justify-center h-10 w-10 absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="inline-flex items-center justify-center h-10 w-10 absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10 disabled:opacity-40 disabled:cursor-not-allowed hidden md:block"
         aria-label="Scroll left"
         @pointerdown.stop
         @pointerup.stop
@@ -322,7 +344,7 @@ function onTouchCancel() {
       <button
         v-if="!isStatic"
         :disabled="animating"
-        class="inline-flex items-center justify-center h-10 w-10 absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="inline-flex items-center justify-center h-10 w-10 absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/70 z-10 disabled:opacity-40 disabled:cursor-not-allowed hidden md:block"
         aria-label="Scroll right"
         @pointerdown.stop
         @pointerup.stop
