@@ -1,8 +1,21 @@
 {
   "compilerOptions": {
-    "lib": ["ES2022", "DOM"],
+    "target": "ES2022",
+    "module": "ESNext",
     "moduleResolution": "bundler",
-    "types": ["vitest/globals"],
-    "ignoreDeprecations": "6.0"
-  }
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "ESNext.Disposable"],
+    "jsx": "preserve",
+    "strict": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "types": ["vite/client", "vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
