@@ -66,7 +66,6 @@ function resetTransform() {
 onMounted(resetTransform);
 watch(step, resetTransform);
 
-/* SHIFT */
 function shift(by: 1 | -1) {
   if (animating.value || props.items.length <= 1) return;
 
@@ -110,7 +109,6 @@ function prev() {
   shift(-1);
 }
 
-/* React to list size */
 watch(
   () => props.items.length,
   () => {
@@ -121,7 +119,6 @@ watch(
   }
 );
 
-/* AUTOPLAY */
 let timer: number | null = null;
 const hovering = ref(false);
 
@@ -162,7 +159,6 @@ onBeforeUnmount(() => {
   document.removeEventListener("visibilitychange", restartAutoplay);
 });
 
-/* DRAG / SWIPE — prefer Pointer Events, fallback to Touch */
 const usePointer = ref(false);
 onMounted(() => {
   usePointer.value = "PointerEvent" in window;
@@ -211,7 +207,6 @@ function endDrag() {
   deltaX = 0;
 }
 
-/* Pointer handlers (only when usePointer) */
 function onPointerDown(e: PointerEvent) {
   if (!usePointer.value) return;
   if (!beginDrag(e.clientX)) return;
@@ -235,7 +230,6 @@ function onPointerCancel() {
   deltaX = 0;
 }
 
-/* Touch handlers (only when NOT usePointer) */
 function onTouchStart(e: TouchEvent) {
   if (usePointer.value) return;
   const x = e.touches[0]?.clientX ?? 0;
@@ -245,7 +239,6 @@ function onTouchMove(e: TouchEvent) {
   if (usePointer.value) return;
   const x = e.touches[0]?.clientX ?? 0;
   progressDrag(x);
-  // prevent rubber-band horizontal scroll while dragging
   if (dragging && e.cancelable) e.preventDefault();
 }
 function onTouchEnd() {
@@ -279,18 +272,15 @@ function onTouchCancel() {
       class="relative group overflow-hidden select-none touch-pan-y"
       @mouseenter="props.pauseOnHover ? onMouseEnter() : null"
       @mouseleave="props.pauseOnHover ? onMouseLeave() : null"
-      <!--
-      Pointer
-      path
-      --
+      @pointerdown="onPointerDown"
+      @pointermove="onPointerMove"
+      @pointerup="onPointerUp"
+      @pointercancel="onPointerCancel"
+      @touchstart.passive="onTouchStart"
+      @touchmove="onTouchMove"
+      @touchend="onTouchEnd"
+      @touchcancel="onTouchCancel"
     >
-      @pointerdown="onPointerDown" @pointermove="onPointerMove"
-      @pointerup="onPointerUp" @pointercancel="onPointerCancel"
-
-      <!-- Touch fallback (only runs when PointerEvent not available) -->
-      @touchstart.passive="onTouchStart" @touchmove="onTouchMove"
-      <!-- not passive so preventDefault can work -->
-      @touchend="onTouchEnd" @touchcancel="onTouchCancel" >
       <div
         ref="strip"
         data-carousel
