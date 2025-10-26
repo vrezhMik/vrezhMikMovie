@@ -44,29 +44,28 @@ function formatRuntime(minutes: number): string {
             {{ props.movie?.title }}
           </h1>
           <div class="flex flex-wrap items-center gap-3">
-            <div data-debug-wrapper="true" style="display: contents">
+            <div style="display: contents">
               <div
-                data-testid="rating-badge"
                 class="inline-flex items-center justify-center w-12 h-12 rounded-full font-bold text-sm bg-gradient-to-br transition-all duration-300 from-emerald-500 to-emerald-600 shadow-emerald-500/50 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)]"
               >
                 {{ (props.movie?.vote_average ?? 0).toFixed(1) }}
               </div>
             </div>
-            <div data-debug-wrapper="true" style="display: contents">
+            <div style="display: contents">
               <div
                 class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-all duration-300 bg-card/40 backdrop-blur-sm text-foreground border border-white/10"
               >
-                <div data-debug-wrapper="true" style="display: contents">
+                <div style="display: contents">
                   <DateIcon />
                 </div>
                 {{ formatToMonthYear(props.movie?.release_date) }}
               </div>
             </div>
-            <div data-debug-wrapper="true" style="display: contents">
+            <div style="display: contents" v-if="props.movie?.runtime">
               <div
                 class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-all duration-300 bg-card/40 backdrop-blur-sm text-foreground border border-white/10"
               >
-                <div data-debug-wrapper="true" style="display: contents">
+                <div style="display: contents">
                   <TimeIcon />
                 </div>
                 {{ formatRuntime(props.movie?.runtime) }}
@@ -74,16 +73,13 @@ function formatRuntime(minutes: number): string {
             </div>
           </div>
         </div>
-        <div data-debug-wrapper="true" style="display: contents">
+        <div style="display: contents">
           <button
-            data-testid="favorite-button"
-            aria-pressed="false"
             aria-label="Add to favorites"
             class="inline-flex items-center justify-center rounded-full transition-all duration-300 transform-gpu bg-card/60 backdrop-blur-sm text-muted-foreground border border-white/10 hover:bg-card-hover hover:text-foreground h-12 w-12"
-            tabindex="0"
           >
             <div style="transform: none">
-              <div data-debug-wrapper="true" style="display: contents">
+              <div style="display: contents">
                 <LikeIcon />
               </div>
             </div>
