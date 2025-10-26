@@ -65,25 +65,37 @@ describe('ObjectPoolCarousel', () => {
     it('swipe left/right shifts after threshold', async () => {
         const wrapper = mountWith()
 
-        const strip = wrapper.find('[data-carousel]');
-        const panelEl = strip.element.parentElement as HTMLElement;
-        const panel = new DOMWrapper(panelEl);
+        // the handlers are on the root (parent of [data-carousel])
+        const strip = wrapper.find('[data-carousel]')
+        const panelEl = strip.element.parentElement as HTMLElement
+        const panel = new DOMWrapper(panelEl)
 
-        await panel.trigger('touchstart', { touches: [{ clientX: 100 }] })
-        await panel.trigger('touchmove', { touches: [{ clientX: 40 }] })
-        await panel.trigger('touchend')
+        // Let Vue mount fully
+        await flushTiny()
+
+        // ---- drag left (next) ----
+        await panel.trigger('pointerdown', { clientX: 100, pointerId: 1 })
+        await panel.trigger('pointermove', { clientX: 40, pointerId: 1 })  // delta = -60
+        await panel.trigger('pointerup', { clientX: 40, pointerId: 1 })
+
+        // ensure the transition listener is attached, then finish the “CSS” transition
         await waitForTransitionHook()
         await fireTransitionEndOnStrip(wrapper)
+
         const afterLeft = wrapper.emitted('shift') as unknown[][] | undefined
         expect(last(afterLeft)?.[0]).toBe(1)
 
-        await panel.trigger('touchstart', { touches: [{ clientX: 40 }] })
-        await panel.trigger('touchmove', { touches: [{ clientX: 110 }] })
-        await panel.trigger('touchend')
+        // ---- drag right (prev) ----
+        await panel.trigger('pointerdown', { clientX: 40, pointerId: 2 })
+        await panel.trigger('pointermove', { clientX: 110, pointerId: 2 }) // delta = +70
+        await panel.trigger('pointerup', { clientX: 110, pointerId: 2 })
+
         await waitForTransitionHook()
         await fireTransitionEndOnStrip(wrapper)
+
         const afterRight = wrapper.emitted('shift') as unknown[][] | undefined
         expect(last(afterRight)?.[0]).toBe(0)
     })
+
 
 })
