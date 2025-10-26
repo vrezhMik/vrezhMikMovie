@@ -12,11 +12,10 @@ export default defineConfig({
         setupFiles: './tests/setup.ts',
         css: false,
 
-        // 🔽 Vitest UI config (no CLI flags needed)
         ui: true,
         uiBase: '/',
         api: {
-            host: true,   // bind 0.0.0.0 so it’s reachable from outside the container
+            host: true,
             port: 51204,
         },
         watch: true,

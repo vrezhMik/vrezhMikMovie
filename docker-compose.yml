@@ -20,4 +20,4 @@ services:
     env_file: [.env.local]
     environment:
       - ROLLUP_SKIP_NODEJS_NATIVE=1
-    command: ["npm", "run", "test:ui"] # 👈 no extra flags here
+    command: ["npm", "run", "test:ui"]
