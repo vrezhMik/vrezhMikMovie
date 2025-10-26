@@ -3,8 +3,9 @@ import DateIcon from "@/components/icons/DateIcon.vue";
 import LikeIcon from "@/components/icons/LikeIcon.vue";
 import TimeIcon from "@/components/icons/TimeIcon.vue";
 import type { TmdbMovieFull } from "@/shared/api/tmdb";
-import { computed } from "vue";
-
+import { ref, onMounted, computed } from "vue";
+import { useFavorites } from "@/shared/favorites/useFavorites";
+import MovieBigIcon from "../icons/MovieBigIcon.vue";
 const props = defineProps<{ movie: TmdbMovieFull }>();
 function formatToMonthYear(dateStr?: string) {
   if (!dateStr) return "";
@@ -15,7 +16,7 @@ function formatToMonthYear(dateStr?: string) {
     year: "numeric",
   }).format(d);
 }
-
+const readMore = ref<boolean>(true);
 function formatRuntime(minutes: number): string {
   if (!minutes || minutes <= 0) return "0min";
   const h = Math.floor(minutes / 60);
@@ -24,9 +25,7 @@ function formatRuntime(minutes: number): string {
   if (h > 0) return `${h}h`;
   return `${m}min`;
 }
-import { ref, onMounted } from "vue";
-import { useFavorites } from "@/shared/favorites/useFavorites";
-import MovieBigIcon from "../icons/MovieBigIcon.vue";
+
 const fav = useFavorites();
 const liked = ref(false);
 onMounted(async () => {
@@ -163,9 +162,25 @@ const ratingClass = computed(() => {
         <h2 class="text-2xl font-display font-semibold text-foreground">
           Overview
         </h2>
-        <p class="text-muted-foreground leading-relaxed line-clamp-3">
+        <p
+          :class="[
+            'text-muted-foreground leading-relaxed',
+            { 'line-clamp-3': readMore },
+          ]"
+        >
           {{ props.movie?.overview }}
         </p>
+        <button
+          class="block lg:hidden"
+          @click="
+            () => {
+              readMore = !readMore;
+            }
+          "
+        >
+          <span v-if="readMore" class="text-primary">Read more</span>
+          <span v-else class="text-primary">Read less</span>
+        </button>
       </div>
     </div>
   </div>
